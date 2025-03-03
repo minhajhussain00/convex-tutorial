@@ -1,20 +1,17 @@
 import { useEffect, useState } from "react";
 import { faker } from "@faker-js/faker";
+import { api } from "../convex/_generated/api";
+import { useQuery, useMutation } from "convex/react";
 
-// For demo purposes. In a real app, you'd have real user data.
 const NAME = getOrSetFakeName();
 
 export default function App() {
-  const messages = [
-    { _id: "1", user: "Alice", body: "Good morning!" },
-    { _id: "2", user: NAME, body: "Beautiful sunrise today" },
-  ];
-  // TODO: Add mutation hook here.
+  const messages = useQuery(api.chat.getMessages);
+  const sendMessage = useMutation(api.chat.sendMessage);
 
   const [newMessageText, setNewMessageText] = useState("");
 
   useEffect(() => {
-    // Make sure scrollTo works on button click in Chrome
     setTimeout(() => {
       window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" });
     }, 0);
@@ -39,11 +36,12 @@ export default function App() {
         </article>
       ))}
       <form
-        onSubmit={async (e) => {
-          e.preventDefault();
-          alert("Mutation not implemented yet");
-          setNewMessageText("");
-        }}
+      onSubmit={async (e) => {
+        e.preventDefault();
+        await sendMessage({ user: NAME, body: newMessageText });
+
+        setNewMessageText("");
+      }}
       >
         <input
           value={newMessageText}
